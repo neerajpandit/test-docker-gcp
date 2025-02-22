@@ -52,13 +52,32 @@ jobs:
           credentials_json: ${{ secrets.GCP_CREDENTIALS }}
 
       # Step 2: Deploy to Google Cloud Run
-      - name: 🚀 Deploy to Cloud Run
-        run: |
-          gcloud run deploy ${{ secrets.GCP_SERVICE_NAME }} \
-            --image=${{ secrets.DOCKER_HUB_USERNAME }}/${{ secrets.DOCKER_HUB_REPO_NAME }}:latest \
-            --platform=managed \
-            --region=${{ secrets.GCP_REGION }} \
-            --allow-unauthenticated
+      # - name: 🚀 Deploy to Cloud Run
+      #   run: |
+      #     gcloud run deploy {{ secrets.GCP_SERVICE_NAME }} \
+      #       --image={{ secrets.DOCKER_HUB_USERNAME }}/{{ secrets.DOCKER_HUB_REPO_NAME }}:latest \
+      #       --platform=managed \
+      #       --region={{ secrets.GCP_REGION }} \
+      #       --allow-unauthenticated
+
+      # Step 2: SSH into the VM and deploy the container
+      - name: 🚀 Deploy to GCP VM
+        uses: appleboy/ssh-action@v0.1.7
+        with:
+          host: ${{ secrets.GCP_VM_IP }}  # Your VM's external IP
+          username: ${{ secrets.GCP_VM_USERNAME }}  # Your VM SSH username
+          key: ${{ secrets.GCP_SSH_PRIVATE_KEY }}  # SSH private key for authentication
+          script: |
+            # Stop and remove the existing container (if any)
+            docker stop my-app-container || true
+            docker rm my-app-container || true
+            
+            # Pull the latest image from Docker Hub
+            docker pull ${{ secrets.DOCKER_HUB_USERNAME }}/${{ secrets.DOCKER_HUB_REPO_NAME }}:latest
+            
+            # Run the new container
+            docker run -d --name my-app-container -p 80:3000 ${{ secrets.DOCKER_HUB_USERNAME }}/${{ secrets.DOCKER_HUB_REPO_NAME }}:latest
+
 
       # Step 3: Send Slack Notification
       - name: Send Slack Notification
