@@ -85,14 +85,13 @@ jobs:
         uses: slackapi/slack-github-action@v1
         with:
           channel-id: '#deployment-gcp'  # Replace with your Slack channel name
-          webhook-url: ${{ secrets.SLACK_WEBHOOK_URL }}
           slack-message: |
-            🚀 *Deployment Status*: ${{ job.status }}
-            📌 *Repository*: ${{ github.repository }}
-            🔀 *Branch*: ${{ github.ref_name }}
-            🔢 *Commit Hash*: ${{ github.sha }}
-            🧑‍💻 *Triggered by*: ${{ github.actor }}
-            🔗 *Run URL*: <https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}>
+            🚀 *Deployment Status*: {{ job.status }}
+            📌 *Repository*: {{ github.repository }}
+            🔀 *Branch*: {{ github.ref_name }}
+            🔢 *Commit Hash*: {{ github.sha }}
+            🧑‍💻 *Triggered by*: {{ github.actor }}
+            🔗 *Run URL*: <https://github.com/{{ github.repository }}/actions/runs/${{ github.run_id }}>
         env:
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
 
